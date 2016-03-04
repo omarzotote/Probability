@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
@@ -20,15 +22,19 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import Adapters.NumberListAdapter;
+import Data.NumberListManager;
+
 public class MainActivity extends AppCompatActivity {
 
-    ArrayList<Double> data = new ArrayList<>();
     EditText number;
     LinearLayout linearLayout;
-    ScrollView scrollView;
-    LinearLayout layout2;
     Intent i;
     Context context = this;
+    RecyclerView recyclerView;
+    RecyclerView.Adapter adapter = new NumberListAdapter();
+    NumberListManager numberListManager = new NumberListManager();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -36,30 +42,27 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+
         final Button add = (Button) findViewById(R.id.button);
         final Button calc = (Button) findViewById(R.id.button2);
         final Button clear = (Button) findViewById(R.id.button3);
-        linearLayout = (LinearLayout) findViewById(R.id.linearlayout);
-        layout2 = (LinearLayout) findViewById(R.id.layout2);
         number = (EditText) findViewById(R.id.editText);
-        scrollView = (ScrollView) findViewById(R.id.scrollview);
 
         add.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(!number.getText().toString().isEmpty()){
-                    data.add(Double.parseDouble(number.getText().toString()));
-                    TextView newNumber = new TextView(MainActivity.this);
-                    newNumber.setText(number.getText().toString());
-                    newNumber.setTextSize(20);
-                    number.setText("");
-                    layout2.addView(newNumber);
+                    numberListManager.add(Double.parseDouble(number.getText().toString()));
+                    adapter.notifyItemInserted(0);
                 }
             }
         });
         calc.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 i = new Intent(context, ProbabilityActivity.class);
-                i.putExtra("data",data);
                 context.startActivity(i);
             }
         });

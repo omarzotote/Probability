@@ -17,8 +17,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import Data.NumberListManager;
+
 public class ProbabilityActivity extends AppCompatActivity {
 
+    NumberListManager manager = new NumberListManager();
     ArrayList<Double> data = new ArrayList<>();
     LinearLayout linearLayout;
     double sumatoria;
@@ -31,7 +34,7 @@ public class ProbabilityActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Intent i = getIntent();
-        data =(ArrayList<Double>) i.getSerializableExtra("data");
+        data = manager.get();
 
         //Ordenados
         sortData();
