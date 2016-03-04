@@ -51,6 +51,12 @@
                 android:id="@+id/button2"
                 android:layout_gravity="center_horizontal" />
 
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=" Limpiar"
+                android:id="@+id/button3" />
+
         </LinearLayout>
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerView"
@@ -59,9 +65,4 @@
             >
         </android.support.v7.widget.RecyclerView>
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text=" Limpiar"
-            android:id="@+id/button3" />
-    </LinearLayout>
+</LinearLayout>

@@ -27,4 +27,8 @@ public class NumberListManager{
     public void remove(int index) {
         data.remove(index);
     }
+
+    public void clearAll(){
+        data.clear();
+    }
 }

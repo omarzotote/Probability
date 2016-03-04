@@ -1,10 +1,12 @@
 package com.example.omar.probability;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -57,24 +59,39 @@ public class MainActivity extends AppCompatActivity {
                 if(!number.getText().toString().isEmpty()){
                     numberListManager.add(Double.parseDouble(number.getText().toString()));
                     adapter.notifyItemInserted(0);
+                    number.setText("");
                 }
             }
         });
         calc.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                i = new Intent(context, ProbabilityActivity.class);
-                context.startActivity(i);
+                if(numberListManager.size()>0) {
+                    i = new Intent(context, ProbabilityActivity.class);
+                    context.startActivity(i);
+                }
             }
         });
         clear.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
+                new AlertDialog.Builder(context)
+                        .setTitle("Borrar datos")
+                        .setMessage("¿Eliminar todos los datos?")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                numberListManager.clearAll();
+                                adapter.notifyDataSetChanged();
+                                NumberListAdapter.n = 0;
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                //do nothing
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
             }
         });
-    }
-
-    public void addNumber(){
-
     }
 
     @Override
