@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,7 +25,7 @@ public class ProbabilityActivity extends AppCompatActivity {
     NumberListManager manager = new NumberListManager();
     ArrayList<Double> data = new ArrayList<>();
     LinearLayout linearLayout;
-    double sumatoria;
+    double sumatoria, average;
     int n;
 
     @Override
@@ -46,7 +47,7 @@ public class ProbabilityActivity extends AppCompatActivity {
         for (Double n:data) {
             ordered.setText(ordered.getText() + String.valueOf(n) + "\n");
             sumatoria +=n;
-        };
+        }
         //Media
         TextView avg = new TextView(ProbabilityActivity.this);
         avg.setText("Media: " + String.valueOf(getAverage()));
@@ -55,35 +56,52 @@ public class ProbabilityActivity extends AppCompatActivity {
         mid.setText("Mediana: " + String.valueOf(getMedian()));
         //moda
         TextView mode = new TextView(ProbabilityActivity.this);
-        if(getMode()!=-100000.0) {
-            mode.setText("Moda: " + String.valueOf(getMode()));
+        StringBuilder modeString = new StringBuilder();
+        modeString.append("Moda:");
+        ArrayList<Double> modeList = getMode();
+        for(Double number : modeList) {
+            modeString.append("\n\t" + String.valueOf(number));
         }
-        else
-        {
-            mode.setText("Moda: No hay moda");
-        }
+        mode.setText(modeString.toString());
         //Range
         TextView range = new TextView(ProbabilityActivity.this);
         range.setText("Rango: " + String.valueOf(getRange()));
         //Variance
         TextView variance = new TextView(ProbabilityActivity.this);
-        variance.setText("Varianza: " + String.valueOf(getVariance()));
+        variance.setText("Varianza poblacional: " + String.valueOf(getVariance()));
+        //Sample Variance
+        TextView sample_variance = new TextView(ProbabilityActivity.this);
+        if(n > 1) {
+            sample_variance.setText("Varianza muestral: " + String.valueOf(getSampleVariance()));
+        }
         //Desviación estandar
         TextView de = new TextView(ProbabilityActivity.this);
-        de.setText("Desviación estandar: " + String.valueOf(getStandardDeviation()));
+        de.setText("Desviación estandar poblacional: " + String.valueOf(getStandardDeviation()));
+        //Sample Desviación estandar
+        TextView sample_de = new TextView(ProbabilityActivity.this);
+        if(n > 1) {
+            sample_de.setText("Desviación estandar muestral: " + String.valueOf(getSampleStandardDeviation()));
+        }
         //Desviación media
         TextView dm = new TextView(ProbabilityActivity.this);
         dm.setText("Desviación media: " + String.valueOf(getMeanDeviation()));
         //Put TextView in layout
         linearLayout =(LinearLayout) findViewById(R.id.probabilitylayout);
+        linearLayout.addView(orderedTitle);
         linearLayout.addView(ordered);
         linearLayout.addView(avg);
         linearLayout.addView(mid);
         linearLayout.addView(mode);
         linearLayout.addView(range);
-        linearLayout.addView(variance);
-        linearLayout.addView(de);
         linearLayout.addView(dm);
+        linearLayout.addView(variance);
+        if(n > 1) {
+            linearLayout.addView(sample_variance);
+        }
+        linearLayout.addView(de);
+        if(n > 1) {
+            linearLayout.addView(sample_de);
+        }
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
@@ -94,43 +112,37 @@ public class ProbabilityActivity extends AppCompatActivity {
     }
 
     public double getAverage(){
-        double average;
         average = sumatoria / n;
         return average;
     }
 
     public double getMedian(){
-        double median,mid;
-        mid = n/2.0;
-        if(mid%1.0==0){
-            median = data.get((int) mid);
-            median+= data.get((int)mid+1);
+        double median = data.get(n / 2);
+        if(n % 2 == 0){
+            median+= data.get(n / 2 - 1);
             median/=2.0;
-        }
-        else{
-            return data.get((int)mid);
         }
         return median;
     }
 
-    public double getMode(){
-        int frecuenciaTemporal=0,frecuenciaModa=0,i=0;
-        double mode = -100000;
-        double[] dataTemp = new double[n];
-        for(Double d : data){
-            dataTemp[i++] = d;
-        }
-        for(i=0;i<n-1;i++){
-            if(dataTemp[i+1] == dataTemp[i]){
-                frecuenciaTemporal++;
+    public ArrayList<Double> getMode(){
+        int[] freq = new int[n];
+        ArrayList<Double> mode = new ArrayList<>();
+        int modeFreq = 1;
+        freq[0] = 1;
+        for(int i = 1; i < n; i++){
+            if(Double.compare(data.get(i-1),data.get(i)) == 0){
+                freq[i] = freq[i - 1] + 1;
             }
             else{
-                if(frecuenciaTemporal>frecuenciaModa){
-                    frecuenciaModa=frecuenciaTemporal;
-                    mode=dataTemp[i];
-                    frecuenciaTemporal = 0;
-                }
+                freq[i] = 1;
             }
+            if(modeFreq < freq[i])
+                modeFreq = freq[i];
+        }
+        for(int i = 0; i < n; i++) {
+            if(freq[i] == modeFreq)
+                mode.add(data.get(i));
         }
         return mode;
     }
@@ -144,7 +156,16 @@ public class ProbabilityActivity extends AppCompatActivity {
     public Double getVariance(){
         double variance=0;
         for(Double d : data){
-            variance += Math.pow(d-getAverage(), 2);
+            variance += Math.pow(d-average, 2);
+        }
+        variance/=n;
+        return variance;
+    }
+
+    public Double getSampleVariance(){
+        double variance=0;
+        for(Double d : data){
+            variance += Math.pow(d-average, 2);
         }
         variance/=(n-1);
         return variance;
@@ -152,14 +173,20 @@ public class ProbabilityActivity extends AppCompatActivity {
 
     public Double getStandardDeviation(){
         double de;
-        de=Math.sqrt(getMeanDeviation());
+        de=Math.sqrt(getVariance());
+        return de;
+    }
+
+    public Double getSampleStandardDeviation(){
+        double de;
+        de=Math.sqrt(getSampleVariance());
         return de;
     }
 
     public Double getMeanDeviation(){
         double dm=0;
         for(Double d : data){
-            dm += Math.pow(d-getAverage(), 2);
+            dm += Math.abs(d-average);
         }
         dm/=n;
         return dm;
